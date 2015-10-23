@@ -1,0 +1,26 @@
+https://www.kaggle.com/c/rossmann-store-sales/data
+* combine files: train.csv & store.csv
+	-changeStateHoliday from a,b,c,0 to 3 independent 0,1 series
+	
+	-expand StoreType to 3 independent 0,1 series
+	-expand Assortment to [1,2,3] series	
+
+	-expand CompetitionOpenSince to 0,1 time series
+	-expand Promo2Since to 0,1 series
+	-expand PromoInterval to 0,1 series
+	
+	
+* fill missing values
+* 1st, try: ignore dates, just treat them as lots of different sample data for
+ that store, and solve for model. Although, I believe there are some time
+dependent patterns. Takeing those patterns into consideration will improve the
+overall accuracy. Maybe, we can use day-of-year?? Does that introduce inproper
+constraints?
+* 2ed: also ignore the store number, it's just a number that links the train.csv and store.csv (i.e., link between sales & store information). 
+* we just train the model based on all information other than dates and store id
+, the final output is Sales as a function of DayOfWeek+Open+Promo+Holiday+etc.
+* normalization (maybe it's build-in inside the program)
+* remove redundant features: Open&Holiday? Promo&Promo2+Promo2Since+PromoInterval?
+* 
+* 
+
