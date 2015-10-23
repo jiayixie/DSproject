@@ -1,1 +1,1 @@
-git pull jy_prog_janus master
+git pull DSproject master
