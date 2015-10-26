@@ -1,0 +1,26 @@
+
+# load data from file on given columns
+def LoadFile( fname, coln_x_L, coln_y, dataX, dataY ):
+	print coln_x_L
+	print coln_y
+	for line in open(fname):
+		data = [ float(f) for f in line.split() ]
+		dataX.append( [ data[index] for index in coln_x_L ] )
+		dataY.append(data[coln_y])
+
+
+
+### main ###
+
+# load data
+dataX = []; dataY = []
+coln_x_L = [1,2,3,4,5,6]
+LoadFile("data_store1.txt", coln_x_L, 0, dataX, dataY)
+print dataX[0:10]
+print dataY[0:10]
+# try linear regression on day_num-sales
+from sklearn import linear_model
+clf = linear_model.LinearRegression()
+clf.fit(dataX, dataY)
+print clf.intercept_, clf.coef_
+print clf.score(dataX, dataY)
