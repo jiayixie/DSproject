@@ -1,3 +1,4 @@
+# this is used to define the store and train data classes, define the pre-processing methods for these two data classes
 
 import numpy as np
 import pandas as pd
@@ -90,7 +91,7 @@ class DataStore:
 	for i in range(self.NR):
 	    week=self.values[i][ipsW]
 	    year=self.values[i][ipsY]
-	    day=1 #*** missing value, day of the week, %w where 0 is Sunday and 6 is Saturday.
+	    day=1 #*** missing value, day of the week, %w where 0 is Sunday and 6 is Saturday. Attention, in datetime, there are a few different definitions for week of the day
 	    if(np.isnan(week) or np.isnan(year)): #*** missing value
 		ordinalDay=datetime.date(3000,1,1).toordinal()
 	    else:
@@ -224,9 +225,9 @@ class DataTrain:
 	self.columns=np.append(self.columns,outNameList)
 	self.NC+=len(outNameList)
 
-    #===expand CompetitionOpenSince to 0,1 time series
-    #===expand Promo2Since to 0,1 series
-    #===expand PromoInterval to 0,1 series
+    #===write dataFrame
+    def writeDataFrame(self):
+	self.df=pd.DataFrame(self.values,columns=self.columns)    
 
     def __repr__(self):
         str="=======\nfilename=%s\n%d X %d array\ncolumns: "%(self.fileName,self.NR,self.NC)
@@ -263,6 +264,9 @@ def main():
     print dataTrain
     print dataTrain.values[0],np.shape(dataTrain.values[0])
     print dataTrain.columns
+    dataTrain.writeDataFrame()
+    print dataTrain.df.head()
+
 if __name__=="__main__":
     main()
 

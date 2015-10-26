@@ -5,7 +5,6 @@ https://www.kaggle.com/c/rossmann-store-sales/data
 	store:
 	-expand StoreType to 3 independent 0,1 series: modifyStoreType
 	-expand Assortment to [1,2,3] series: modifyAssortment	
-	-from CompetitionOpenSinceDay/Month to CompetitionOpenSinceOrdinalDay	
 	-from CompetitionOpenSinceMonth & CompetitionOpenSinceYear get the CompetitionOpenSince_OrdinalDay : modifyCompOpenSince
 	-from Promo2SinceWeek/Year, get Promo2SinceOrdinalDay: modifyPromo2Since	
 
