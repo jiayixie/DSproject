@@ -1,5 +1,8 @@
 # this is used to define the store and train data classes, define the pre-processing methods for these two data classes
 
+# TO DO:
+# in each method, add one line: if this added feature already exist, then skip
+
 import numpy as np
 import pandas as pd
 import os
@@ -45,6 +48,7 @@ class DataStore:
 	self.values=np.hstack((self.values,appList))
         self.columns=np.append(self.columns,['StoreTypeA','StoreTypeB','StoreTypeC'])
         self.NC+=3
+	self.df = pd.DataFrame(self.values,columns=self.columns)
 
     #===change Assortment to 1,2,3s
     def modifyAssortment(self):
@@ -62,6 +66,7 @@ class DataStore:
 	self.values=np.hstack((self.values,np.array([appList]).T))
         self.columns=np.append(self.columns,['AssortmentNum'])
         self.NC+=1
+	self.df = pd.DataFrame(self.values,columns=self.columns)
     
     #===from CompetitionOpenSinceMonth & CompetitionOpenSinceYear get the CompetitionOpenSince_OrdinalDay  
     def modifyCompOpenSince(self):
@@ -82,6 +87,7 @@ class DataStore:
 	self.values=np.hstack((self.values,np.array([appList]).T))
 	self.columns=np.append(self.columns,['CompetitionOpenSinceOrdinalDay'])   	
 	self.NC+=1
+	self.df = pd.DataFrame(self.values,columns=self.columns)
 
     #=== from Promo2SinceWeek/Year, get Promo2SinceOrdinalDay
     def modifyPromo2Since(self):
@@ -101,6 +107,7 @@ class DataStore:
 	self.values=np.hstack((self.values,np.array([appList]).T))
 	self.columns=np.append(self.columns,['Promo2SinceOrdinalDay'])
 	self.NC+=1
+	self.df = pd.DataFrame(self.values,columns=self.columns)
 
     #=== digitize the PrmoInterval month information, Jan->1
     #def modifyPromoInter(self):
@@ -159,6 +166,7 @@ class DataTrain:
 	self.values=np.hstack((self.values,appList))
         self.columns=np.append(self.columns,['PublicHoliday','EasternHolidy','Christmas'])
         self.NC+=3
+	#self.df = pd.DataFrame(self.values,columns=self.columns)
 
     #==== add DayOfYear feature 1-366
     #==== add the prolepic Gregorian ordinal of the data
@@ -177,6 +185,7 @@ class DataTrain:
 	self.values=np.hstack((self.values,appList))
 	self.columns=np.append(self.columns,['Year','Month','DayOfYear','OrdinalDay'])
   	self.NC+=2	
+	#self.df = pd.DataFrame(self.values,columns=self.columns)
 
     #=== add the time-independent store feature to data train
     #by default, the dataStore are sorted array, dataStore.values[0] is info for store id=1, id~[1,N]. In more general situation, will need to sort Store and fill missing store
@@ -199,6 +208,7 @@ class DataTrain:
 	self.values=np.hstack((self.values,appList))
         self.columns=np.append(self.columns,feaNameList)		
 	self.NC+=len(feaNameList)
+	#self.df = pd.DataFrame(self.values,columns=self.columns)
 
     #=== add the time-dependent store features to data train 
     # in this method, only the features that are related to ordinalDay are added
@@ -226,6 +236,7 @@ class DataTrain:
 	self.values=np.hstack((self.values,appList))
 	self.columns=np.append(self.columns,outNameList)
 	self.NC+=len(outNameList)
+	#self.df = pd.DataFrame(self.values,columns=self.columns)
 
     #===write dataFrame
     def writeDataFrame(self):

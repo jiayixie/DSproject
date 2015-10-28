@@ -9,6 +9,7 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 #from sklearn.pipeline import Pipeline
 from sklearn.pipeline import make_pipeline
+from copy import deepcopy
 
 class Data():
 	def __init__(self,fileNameStore,fileNameTrain):
@@ -86,34 +87,69 @@ class Data():
 
 def main():
 	fileStore="../data/store.csv"
-	fileTrain="./train_cut.csv"
+	fileTrain="./train_cut.store1.csv"
+	#fileTrain="./train_cut.csv"
+	#fileTrain="../data/train.csv"
 	data=Data(fileStore,fileTrain)
-	dataOri=data #original data
+
+	
+	dataOri=deepcopy(data) #original data
 	#
 	y=data.df['Sales'].values
-	featureNameList=['Store','DayOfWeek','Customers','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
+	featureNameList=['Store','OrdinalDay','DayOfWeek','Customers','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
 	data.selectFeatures(featureNameList)
 	data.normalizeFeatures('standard')
 	x=data.valuesScaled;
+	idDayOfYear=featureNameList.index('DayOfYear')
+	idYear=featureNameList.index('Year')
+	idOday=featureNameList.index('OrdinalDay')
 
-	xTrain,xTest,yTrain,yTest=train_test_split(x,y,test_size=0.8)
+	xTrain,xTest,yTrain,yTest=train_test_split(x,y,train_size=0.8)
 	
 	#=== regression
+	print "begin to do regression"
 	# fit different polynomials and plot approximations
-	#for degree in [0, 1, 2]:
-	for degree in [1]:
+	yTrainPredLst=[]
+	yTestPredLst=[]
+	degLst=[1]
+	for degree in degLst:
 		est = make_pipeline(sklearn.preprocessing.PolynomialFeatures(degree), LinearRegression())
 		est.fit(xTrain, yTrain)
-		trainError=mean_squared_error(yTrain,est.predict(xTrain))
-		testError=mean_squared_error(yTest,est.predict(xTest))
+		yTrainPred=est.predict(xTrain)
+		yTestPred=est.predict(xTest)
+		trainError=mean_squared_error(yTrain,yTrainPred)
+		testError=mean_squared_error(yTest,yTestPred)
 		#print zip(yTrain,est.predict(xTrain))
 		print degree,trainError**0.5,testError**0.5
+		yTrainPredLst.append(yTrainPred)
+		yTestPredLst.append(yTestPred)
 
 	#===
 	#print data.df.columns
 	print data
-	print data.df.head()
-	print dataOri.df.head()
+	print dataOri
+	print xTrain.shape
+	
+	#print xTrain[idOday]
+	#print xTrain[:,idOday]
+	#==plot training data, test data for year 2013,2014,2015
+	plt.subplot(3,1,1)
+	colorLst=['blue.','yellow.','green.']
+	plt.plot(xTrain[:,idOday],yTrain,'r.') # the observed data
+	for i in range(len(degLst)): # plot the fitted curves
+		plt.plot(xTrain[:,idOday],yTrainPredLst[i],'b.')
+	plt.title('Training data')
+	plt.ylabel('Sales')
+	plt.xlabel('OrdinalDay')
+
+	plt.subplot(3,1,2)
+	plt.plot(xTest[:,idOday],yTest,'r.')
+	plt.plot(xTest[:,idOday],yTestPredLst[i],'b.')
+	plt.title('Testing data')
+	plt.ylabel('Sales')
+
+	plt.show()
+
 	
 
 if __name__=="__main__":
