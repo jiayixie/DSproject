@@ -6,7 +6,9 @@ import sklearn
 from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
-#from sklearn.pipeline import make_pipeline
+import matplotlib.pyplot as plt
+#from sklearn.pipeline import Pipeline
+from sklearn.pipeline import make_pipeline
 
 class Data():
 	def __init__(self,fileNameStore,fileNameTrain):
@@ -86,9 +88,10 @@ def main():
 	fileStore="../data/store.csv"
 	fileTrain="./train_cut.csv"
 	data=Data(fileStore,fileTrain)
+	dataOri=data #original data
 	#
 	y=data.df['Sales'].values
-	featureNameList=['Store','DayOfWeek','Customers','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
+	featureNameList=['Store','DayOfWeek','Customers','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
 	data.selectFeatures(featureNameList)
 	data.normalizeFeatures('standard')
 	x=data.valuesScaled;
@@ -97,8 +100,9 @@ def main():
 	
 	#=== regression
 	# fit different polynomials and plot approximations
-	for degree in [0, 1, 2]:
-		est = sklearn.pipeline.make_pipeline(sklearn.preprocessing.PolynomialFeatures(degree), LinearRegression())
+	#for degree in [0, 1, 2]:
+	for degree in [1]:
+		est = make_pipeline(sklearn.preprocessing.PolynomialFeatures(degree), LinearRegression())
 		est.fit(xTrain, yTrain)
 		trainError=mean_squared_error(yTrain,est.predict(xTrain))
 		testError=mean_squared_error(yTest,est.predict(xTest))
@@ -109,6 +113,8 @@ def main():
 	#print data.df.columns
 	print data
 	print data.df.head()
+	print dataOri.df.head()
+	
 
 if __name__=="__main__":
 	main()

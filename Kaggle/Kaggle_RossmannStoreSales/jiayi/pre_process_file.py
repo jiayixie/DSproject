@@ -168,12 +168,14 @@ class DataTrain:
 	for i in range(self.NR):
 	    strdate=self.values[i][iDate]
 	    date=datetime.datetime.strptime(strdate,"%Y-%m-%d")
+	    year=date.timetuple().tm_year
+	    month=date.timetuple().tm_mon
 	    dayOfYear=date.timetuple().tm_yday
 	    ordianalDay=date.toordinal()
-	    l=[dayOfYear,ordianalDay]
+	    l=[year,month,dayOfYear,ordianalDay]
 	    appList.append(l)
 	self.values=np.hstack((self.values,appList))
-	self.columns=np.append(self.columns,['DayOfYear','OrdinalDay'])
+	self.columns=np.append(self.columns,['Year','Month','DayOfYear','OrdinalDay'])
   	self.NC+=2	
 
     #=== add the time-independent store feature to data train
