@@ -1,4 +1,6 @@
 
+import datetime
+
 # Info of a single store
 #"Store","StoreType","Assortment","CompetitionDistance","CompetitionOpenSinceMonth","CompetitionOpenSinceYear","Promo2","Promo2SinceWeek","Promo2SinceYear","PromoInterval"
 class StoreData(object):
@@ -59,7 +61,7 @@ class TrainData(object):
 
 # combined/complete daily info of a single store
 class DailyRec(TrainData):
-
+	date0 = datetime.date(2013,1,1)
 	# constructed with a (StoreData, TrainData) pair
 	def __init__(self, lineL, sd_L):
 		TrainData.__init__( self, lineL )
@@ -70,8 +72,13 @@ class DailyRec(TrainData):
 		self.asst = sd.asst
 		self.cdis = sd.cdis if self.__isNotBeforeDate(sd.csy,sd.csm,1) else float('nan')
 		self.promo2 = int( sd.promo2 and self.__isNotBeforeWeek(sd.psy,sd.psw) and self.__isWithinMonths(sd.pmons_T) )
-		print self.id,self.Sales,self.date,self.dow,self.st_a,self.st_b,self.st_c,self.asst,self.cdis,self.promo1,self.promo2,self.holi_p,self.holi_e,self.holi_c,self.holi_s,self.isopen
+		self.jday = self.__ndayDiff(self.date, DailyRec.date0)
+		d = self.date
+		print self.id,self.Sales,d.year,d.month,d.day,self.dow,self.st_a,self.st_b,self.st_c,self.asst,self.cdis,self.promo1,self.promo2,self.holi_p,self.holi_e,self.holi_c,self.holi_s,self.jday,int(self.isopen)
 		#print "   ",sd.cdis,sd.csy,sd.csm,sd.promo2,sd.psw,sd.psy,sd.pmons_T
+
+	def __ndayDiff(self, date2, date1):
+		return (date2 - date1).days
 
 	def __isNotBeforeDate(self, y, m, d):
 		return ( (self.date - datetime.date(y,m,d)).total_seconds() >= 0 )
@@ -91,7 +98,6 @@ class DailyRec(TrainData):
 
 ### main ###
 import csv
-import datetime
 
 ftrain='./train.csv'
 fstore='./store.csv'
@@ -103,12 +109,12 @@ with open(fstore) as fin:
 	fin.readline()
 	for idx, line in enumerate( csv.reader(fin,skipinitialspace=True) ):
 		data_s_L.append( StoreData(line) )
-print "Info of",len( data_s_L ),"stores loaded"
+#print "Info of",len( data_s_L ),"stores loaded"
 
 with open(ftrain) as fin:
 	fin.readline()
 	for idx, line in enumerate( csv.reader(fin,skipinitialspace=True) ):
 		#data_t = TrainData(line)
 		data_t_L.append( DailyRec( line, data_s_L ) )
-print "Info of",len( data_t_L ),"daily records loaded"
+#print "Info of",len( data_t_L ),"daily records loaded"
 

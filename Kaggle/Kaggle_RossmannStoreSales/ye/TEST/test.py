@@ -17,18 +17,4 @@ print datetime.datetime.strptime('2015 1 2 1', "%Y %W %w %M") - datetime.timedel
 print datetime.datetime.strptime('2015 Jan 01', '%Y %b %d')
 print datetime.datetime.strptime('2015 deC 01', "%Y %b %d").date()
 
-class Foo(object):
-	def __init__(this):
-		this.date = datetime.date(2012,10,13)
-	def isWithinMonths(this, months_T):
-		for mname in months_T:
-			if this.date.month == datetime.datetime.strptime("2015 " + mname + " 10", "%Y %b %d").month:
-				return True
-		return False
-
-foo = Foo()
-m_T = ('Jan', 'Oct', 'Dec')
-print foo.isWithinMonths(m_T)
-
-print int(True), int(False)
 
