@@ -142,7 +142,8 @@ class DataTrain:
         self.columns=self.df.columns #pandas.core.index.Index
         self.NR=self.values.shape[0]
         self.NC=self.values.shape[1]
-    
+	
+
     #====change StateHoliday from a,b,c,0 to 3 independent 0,1 series
     #====will perform the rm columns at the end
     def modifyStateHoliday(self):
@@ -237,6 +238,10 @@ class DataTrain:
 	self.columns=np.append(self.columns,outNameList)
 	self.NC+=len(outNameList)
 	#self.df = pd.DataFrame(self.values,columns=self.columns)
+
+    #==== remove some empty records
+    #**** missing value
+    #def removeMissingValues(self):
 
     #===write dataFrame
     def writeDataFrame(self):

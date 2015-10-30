@@ -28,3 +28,5 @@ constraints?
 * 
 * 
 
+Problems:
+* Regression, unstable prediction, sometimes, the predicted Sales value goes all the way to +1e11, or <0

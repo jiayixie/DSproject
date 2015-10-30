@@ -59,6 +59,17 @@ class Data():
 	#===can also use sklearn.feature_selection, sklearn.decomposition(.PCA) to select features
 #	 sklearn.decomposition.PCA or sklearn.decomposition.RandomizedPCA
 
+	#=== sort the samples based on a given feature
+	def sortData(self,featureName):
+		columnList=list(self.columns)
+		if featureName not in columnList:
+			print "sortData: name %s not in our feature list! re-select a feature "%featureName
+			sys.exit()
+		index=columnList.index(featureName)
+		idSort=np.argsort(self.values[:,index])
+		self.values=self.values[idSort]
+		self.df=pd.DataFrame(self.values,columns=self.columns)
+
 	#===normalize every feature, and store the scaler in data, so that we can apply the same scaler to testing set
 	def normalizeFeatures(self,flag):
 		
@@ -91,32 +102,39 @@ def main():
 	#fileTrain="./train_cut.csv"
 	#fileTrain="../data/train.csv"
 	data=Data(fileStore,fileTrain)
-
+	#data.sortData('OrdinalDay')
 	
 	dataOri=deepcopy(data) #original data
 	#
 	y=data.df['Sales'].values
-	featureNameList=['Store','OrdinalDay','DayOfWeek','Customers','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
+	#featureNameList=['Store','OrdinalDay','DayOfWeek','Customers','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
+	featureNameList=['Store','OrdinalDay','DayOfWeek','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
 	data.selectFeatures(featureNameList)
 	data.normalizeFeatures('standard')
-	x=data.valuesScaled;
+	x=data.values
+	#x=data.valuesScaled;
 	idDayOfYear=featureNameList.index('DayOfYear')
 	idYear=featureNameList.index('Year')
 	idOday=featureNameList.index('OrdinalDay')
 
 	xTrain,xTest,yTrain,yTest=train_test_split(x,y,train_size=0.8)
-	
+
+	print xTest[:,2]
+	print yTest,len(yTest[yTest==0])
 	#=== regression
+	# do not need scaled features
+	#Problem: unstable prediction, prediceted y may >1E10, or <0
 	print "begin to do regression"
 	# fit different polynomials and plot approximations
 	yTrainPredLst=[]
 	yTestPredLst=[]
-	degLst=[1]
+	degLst=[1,2,4]
 	for degree in degLst:
 		est = make_pipeline(sklearn.preprocessing.PolynomialFeatures(degree), LinearRegression())
 		est.fit(xTrain, yTrain)
 		yTrainPred=est.predict(xTrain)
 		yTestPred=est.predict(xTest)
+		print yTestPred[0:10],len(yTestPred[yTestPred==0])
 		trainError=mean_squared_error(yTrain,yTrainPred)
 		testError=mean_squared_error(yTest,yTestPred)
 		#print zip(yTrain,est.predict(xTrain))
@@ -124,30 +142,46 @@ def main():
 		yTrainPredLst.append(yTrainPred)
 		yTestPredLst.append(yTestPred)
 
-	#===
-	#print data.df.columns
-	print data
-	print dataOri
-	print xTrain.shape
+	#=== gradient descent
+	# sklearn.linear_model.SGDRegressor
 	
-	#print xTrain[idOday]
-	#print xTrain[:,idOday]
+
+	#===
 	#==plot training data, test data for year 2013,2014,2015
-	plt.subplot(3,1,1)
-	colorLst=['blue.','yellow.','green.']
-	plt.plot(xTrain[:,idOday],yTrain,'r.') # the observed data
+	#- sort data before plotting
+	idX=idOday
+	idTrSort=np.argsort(xTrain[:,idX])
+	idTeSort=np.argsort(xTest[:,idX])
+	xTrain=xTrain[idTrSort]
+	yTrain=yTrain[idTrSort]
+	xTest=xTest[idTeSort]
+	yTest=yTest[idTeSort]
+	plt.subplot(2,1,1)
+	colorLst=['blue','yellow','green','gray']
+	xLst=xTrain
+	yLst=yTrain
+	yPredLst=yTrainPredLst
+	idSort=idTrSort
+	plt.plot(xLst[:,idX],yLst,'r.') # the observed data
 	for i in range(len(degLst)): # plot the fitted curves
-		plt.plot(xTrain[:,idOday],yTrainPredLst[i],'b.')
+		color=colorLst[i]
+		yPredLst[i]=yPredLst[i][idSort]
+		plt.plot(xLst[:,idX],yPredLst[i],color)
 	plt.title('Training data')
 	plt.ylabel('Sales')
-	plt.xlabel('OrdinalDay')
+	x1,x2,y1,y2=plt.axis()
 
-	plt.subplot(3,1,2)
-	plt.plot(xTest[:,idOday],yTest,'r.')
-	plt.plot(xTest[:,idOday],yTestPredLst[i],'b.')
+	plt.subplot(2,1,2)
+	xLst=xTest;yLst=yTest;yPredLst=yTestPredLst;idSort=idTeSort
+	plt.plot(xLst[:,idX],yLst,'b.') # the observed data
+	for i in range(len(degLst)): # plot the fitted curves
+		color=colorLst[i]
+		yPredLst[i]=yPredLst[i][idSort]
+		plt.plot(xLst[:,idX],yPredLst[i],color)
 	plt.title('Testing data')
 	plt.ylabel('Sales')
-
+	plt.xlabel('OrdinalDay')
+	plt.axis((x1,x2,y1,y2))
 	plt.show()
 
 	
