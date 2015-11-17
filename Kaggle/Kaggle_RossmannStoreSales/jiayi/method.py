@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from sklearn.pipeline import Pipeline
 from sklearn.pipeline import make_pipeline
 from copy import deepcopy
-from plot_scatter_matrix import scatterplot_matrix
+#from plot_scatter_matrix import scatterplot_matrix
 
 class Data():
 	def __init__(self,fileNameStore,fileNameTrain):
@@ -56,7 +56,8 @@ class Data():
 				print "name %s not in our feature list! re-select features"%name
 				sys.exit()
 		df=self.df[featureNameList]
-		self.__fillValue__(df)
+		#self.__fillValue__(df)
+		return df
 	#===can also use sklearn.feature_selection, sklearn.decomposition(.PCA) to select features
 #	 sklearn.decomposition.PCA or sklearn.decomposition.RandomizedPCA
 
@@ -71,10 +72,11 @@ class Data():
 		self.values=self.values[idSort]
 		self.df=pd.DataFrame(self.values,columns=self.columns)
 
-	#===normalize every feature, and store the scaler in data, so that we can apply the same scaler to testing set
-	def normalizeFeatures(self,flag):
+	#===normalize every feature, and store the scaler in data, so that we can apply the same scaler to test set
+	def normalizeFeatures(self,flag,featureNameList):
 		
-		xTrain=self.values
+		#xTrain=self.values
+		xTrain=self.df[featureNameList].values
 		if(flag=='standard'):
 		#every feature will have mean=0,std=1
 			self.scaler=sklearn.preprocessing.StandardScaler().fit(xTrain)
@@ -219,9 +221,9 @@ def main():
 	y=data.df['Sales'].values
 	#featureNameList=['Store','OrdinalDay','DayOfWeek','Customers','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
 	featureNameList=['Store','OrdinalDay','DayOfWeek','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
-	data.selectFeatures(featureNameList)
+	df=data.selectFeatures(featureNameList)
 	data.normalizeFeatures('standard')
-	x=data.values
+	x=df.values
 	idDayOfYear=featureNameList.index('DayOfYear')
 	idYear=featureNameList.index('Year')
 	idOday=featureNameList.index('OrdinalDay')
