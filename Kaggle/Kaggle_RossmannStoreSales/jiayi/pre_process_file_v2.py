@@ -1,4 +1,5 @@
 # this is used to define the store and train data classes, define the pre-processing methods for these two data classes
+#==pre process the two files, digitizing the data, and combine the information from two files together
 
 # TO DO:
 # in each method, add one line: if this added feature already exist, then skip
@@ -9,7 +10,8 @@ import os
 import sys
 import datetime
 
-#Store Data
+#Store Data: supplemental information about the stores
+#===digitize the information, and from Mon/Year info compute the Ordinal Day info (makes it easier to compare dates later) 
 class DataStore:
     def __init__(self,fileName):
         self.fileName=fileName
@@ -19,8 +21,9 @@ class DataStore:
     
     def readData(self):
 	dtype={'Store':int,'DayOfWeek':int}
-	#dtype={'DayOfWeek':int}
         self.df=pd.read_csv(self.fileName) #dataForm
+	#print "Data Store: number of nan record:\n{0}".format(self.df.isnull().sum())
+	#self.df=self.df.dropna() # remove missing value records, need to deal with these missing values later
         self.NR=self.df.values.shape[0]
         self.NC=self.df.values.shape[1]
    
@@ -47,7 +50,7 @@ class DataStore:
 	self.df=self.df.join(to_join)
 	self.NC+=3
 
-    #===change Assortment to 1,2,3s
+    #===change level of Assortment to 1,2,3
     def modifyAssortment(self):
         iA=list(self.df.columns).index('Assortment')
 	appList=[]
@@ -119,7 +122,7 @@ class DataStore:
         str+="\n"
         return str
 
-#Train Data
+#Train Data: (daily) historical data including Sales
 class DataTrain:
     def __init__(self,fileName):
         self.fileName=fileName
@@ -129,6 +132,8 @@ class DataTrain:
 
     def readData(self):
         self.df=pd.read_csv(self.fileName) #dataForm
+	#self.df=self.df.dropna() # remove missing value records
+	#print "Data Train: number of nan record:\n{0}".format(self.df.isnull().sum())
         self.NR=self.df.values.shape[0]
         self.NC=self.df.values.shape[1]
 	

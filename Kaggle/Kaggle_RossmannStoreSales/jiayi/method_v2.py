@@ -1,15 +1,16 @@
 # method.py 
-# this is used to pre process the data, apply different methods to the data, and make plots
+#
+# this is used to analyze the data, apply different methods to the data, and make plots
 from pre_process_file_v2 import * #  define the data class, and pre-process the data files
 import sklearn 
 #from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
-import matplotlib.pyplot as plt
 from sklearn.pipeline import Pipeline
 from sklearn.pipeline import make_pipeline
 from copy import deepcopy
+import matplotlib.pyplot as plt
 from pandas.tools.plotting import scatter_matrix
 
 class Data():
@@ -72,12 +73,12 @@ class Data():
 
 #==========================================================================
 #=== stepWise feature selection ==== forward ====
-def featureRedu(df):
+def featureRedu(dfIn):
 	#-generate the x (feature), and y (response)
-	y=df['Sales'].values
+	y=dfIn['Sales'].values
 	#-based on commmon sense, select some feature to start with
-	featureNameList=['Store','OrdinalDay','DayOfWeek','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin']
-	df=df[featureNameList]
+	featureNameList=['Store','OrdinalDay','DayOfWeek','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin'] #,'Customers'] 
+	df=dfIn[featureNameList]
 	
 	#=== stepwise feature selection
 	Nfeature=len(featureNameList)	
@@ -88,7 +89,7 @@ def featureRedu(df):
 	recordNLst=[] # # of features
 	recordCoeffLst=[] # this is a 2d list, stores the coefficients from every step's regression result
 	Nf=len(featureNameList)
-	#error=regression_simp(x,y,0) # regression with no feature, just intercept
+	#error=regression_simp(x,y,0) # regression with no feature, just intercept, need to turn on the fit_intercept in LinearRegression
 	#print error
 
 	while(len(lastfLst)<Nf):
@@ -110,27 +111,33 @@ def featureRedu(df):
 		recordCoeffLst.append(coeffLstMin)
 
 	print "\n====Forward StepWise feature reduction===="
+	print "intercept=%5.3E"%(recordCoeffLst[Nf-1][0])
 	for i in range(Nf):
 		print "i=%2d error=%5.3E Nfeature=%d Ceoff=%5.3E feaNm=%-20s"%(i,recordErrorLst[i],recordNLst[i],recordCoeffLst[Nf-1][i+1],lastfLst[i])
 		#-the 0th Coeff is for the constant, not for feature, so use [i+1] instead of [i] to access the coefficient
 		#print recordCoeffLst[i]
 		#print lastfLst[0:i+1]
 	#print lastfLst
+	plt.close('all')
 	plt.plot(recordNLst,recordErrorLst,'r-')
+	plt.ylabel("MSE")
+	plt.xlabel("# of features")
 	plt.savefig("pic/featureRedu.png")
 	#plt.show()
 	#-return the recorded stepWise change of error(1d), coefficient (2d), and the feature name list (1d list, ordered by the importance of feature)
-	#-attention, the len(recordCoeffLst)=len(lastfLst)+1!=len(lastfLst) because the 0th Coeff is for the constant, not for feature
+	#-attention, the len(recordCoeffLst)=len(lastfLst)+1!=len(lastfLst) because the 0th Coeff is for the constant/intercept, not for feature coeff
 	return recordErrorLst,recordCoeffLst,lastfLst  
 
 #=== the simple regression, polynomial + linear regression
 def regression_simp(x,y,deg):
 	#est=make_pipeline(sklearn.preprocessing.PolynomialFeatures(deg),LinearRegression())
-	est=Pipeline([('PolyFea',sklearn.preprocessing.PolynomialFeatures(deg)),('LinearReg',LinearRegression())])
+	est=Pipeline([('PolyFea',sklearn.preprocessing.PolynomialFeatures(deg)),('LinearReg',LinearRegression(fit_intercept=False))]) #-PolynomialFeatures has created a constant term (i.e. intercept), so do not need to fit intercept anymore
 	est.fit(x,y)
 	NfeatI=est.named_steps['PolyFea'].n_input_features_
 	NfeatO=est.named_steps['PolyFea'].n_output_features_
 	coeff=est.named_steps['LinearReg'].coef_
+	intercept=est.named_steps['LinearReg'].intercept_
+
 	yPred=est.predict(x)
 	error=mean_squared_error(y,yPred)
 	return error,coeff,NfeatI,NfeatO
@@ -190,47 +197,60 @@ def plotRegression(idX,degLst,*valueLst):
 		sys.exit()
 	#-
 	x=valueLst[0];y=valueLst[1];yPred=valueLst[2]
+	plt.close('all')
 	x1,x2,y1,y2=plotRegSub(degLst,idX,211,x,y,yPred,' ','Sales','Training Data')
 	if(N==6):
 		x=valueLst[3];y=valueLst[4];yPred=valueLst[5]
 		plotRegSub(degLst,idX,212,x,y,yPred,' ','Sales','Test Data')
-		plt.axis((x1,x2,y1,y2))
+		#plt.axis((x1,x2,y1,y2))
+	#plt.tight_layout()
 	plt.savefig("pic/fit_poly.png")
 	#plt.show()
 
 
 def main():
+	#===read in train and store data, combine them
 	fileStore="../data/store.csv"
 	fileTrain="./train_cut.store1.csv"
 	#fileTrain="./train_cut.csv"
 	#fileTrain="../data/train.csv"
 	data=Data(fileStore,fileTrain)
 	#--sort the data by date ---
-	data.df.sort(['OrdinalDay'])
+	data.df=data.df.sort(columns=['OrdinalDay'],ascending=True)
+	print "\n=====writting the combined data..."
+	data.df.to_csv("./combined_train_store.csv")
 
 	#===do feature reduction
 	ErrorReduLst,CoeffReduLstLst,featureReduLst =featureRedu(data.df)
-	featureNameList=['Sales']+featureReduLst[0:4]
+	featureNameList=['Sales']+featureReduLst[0:5]
+	#-
+	plt.close('all')
 	df=data.df[featureNameList]
-	scatter_matrix(df)
+	scatter_matrix(df,alpha=0.2)
 	plt.savefig('pic/scatter_matrix.png')
 
-	#=== gradient descent
+	#=== other regression to try
+	# http://scikit-learn.org/stable/modules/linear_model.html
 	# sklearn.linear_model.SGDRegressor
 	# sklearn.linear_model.Ridge
 
     	#===do regression
 	y=data.df['Sales'].values
 	#featureNameList=['Store','OrdinalDay','DayOfWeek','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin'] # 'Customers'
-	featureNameList=featureReduLst[0:4]
+	featureNameList=featureReduLst[0:5]
 	data.normalizeFeatures('standard',featureNameList) #-> self.dfScaled, self.scaler
 	x=data.dfScaled.values
+	#x=data.df[featureNameList].values
     	xTrain,xTest,yTrain,yTest=train_test_split(x,y,train_size=0.8)
 	#-
     	degLst=[1,2]
     	yTrainPredLst,yTestPredLst,trainError,testError=regression(xTrain,xTest,yTrain,yTest,degLst)
-	idX=-1 #-the index of the xvalue I want to use as x-axis. If idX<0, then just plot against the data #
+	#idX=-1 #-the index of the xvalue I want to use as x-axis. If idX<0, then just plot against the data #
 	#idX=list(data.dfScaled.columns).index('OrdinalDay')
+	if('OrdinalDay' in featureNameList):
+		idX=featureNameList.index('OrdinalDay')
+	else:
+		idX=-1
 	plotRegression(idX,degLst,xTrain,yTrain,yTrainPredLst,xTest,yTest,yTestPredLst)
 	#===========
 
