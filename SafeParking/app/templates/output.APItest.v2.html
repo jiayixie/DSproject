@@ -32,12 +32,23 @@
  <div class="container">
 
 	 <div class="col-md-6 "  style="background-color: white; opacity: 1.0; overflow:auto; height:550px; " >
+		<br>
 		 <!--<h4><b>{{title1}}</b><h4>	 -->
 		<h4><b>{{titlemsg}}</b><h4>	 
-		<p>{{message}}</p>		 
+		<br>
+		<br>
+		<!--<p>{{message}}</p>		 -->
+        <table class="table table-hover sortable">
+        <tr><th>{{message}}</th></tr>
+        {% set i=1 %}
+        {% for addr in addressPeak %}
+        <tr><td color="red">{{addr}}</td></tr>
+        {% set i = i+1 %}
+        {% endfor %}
+        </table>
 		<br>
 		<h4 style="color:blue;"><b>{{message2}}<h4></p>
-		<img src="/image/{{imgnmRS}}" height='320'; width=450>
+		<!--<img src="/image/{{imgnmRS}}" height='320'; width=450> -->
 	</div> <!--colmd6-->
 
 	<div id="map" style="width:550px;height:550px;"></div>

@@ -106,29 +106,25 @@ def getCrimeMap(addressIn,hr,dhr):#,rad=1300.): # radius(actually half box lengt
     #-- plot the risk score image as a function of hour, and also get the suggested parking hour based on moving window average
     imgnmRS,hrSug,RSSug=plotRiskScore(riskScoreDeltaLst,hr,dhr)
     #-- get the peak-crime-spots' kde values, locations (lon&lat&address), and the 2-point correlation value
-    flagRandom,seglonLst,seglatLst,segcolorLst=crimeKdeCorr(dfHrLoc,step=100,flagCptCorr=1); # step in meters
-
+    flagRandom,seglonLst,seglatLst,segcolorLst,locPeak=crimeKdeCorr(dfHrLoc,step=100,flagCptCorr=0); # step in meters
+    #---get the address of the peak crime point
+    address= loc2address(locPeak,0)
     #--- get the whole day's map
     dfW,seglonLstW,segLatLstW,segcolorLstW=getInfoHrSug(0,24,latRange,lonRange,conn)
     avgRateW=len(dfW)/area/DAYtotal/24.
     RSW=50+50*(avgRateW-avgRateAll)/avgRateAll
     """
-    #--cheat----
-    if ("University" in addressIn):
-	    #print "yes, cheat!!!"
-	    flagRandom=0
-    elif ("63" in addressIn):
-	    flagRandom=1
     """
+    #print "#### test, address=",address,locPeak
 
     print "Number of crimes in this area around this time:",len(dfHrLoc)
-    print "Risk Score for the entire day:",RSW
+    #print "Risk Score for the entire day:",RSW
 
     if(hrSug!=hr): # the suggested parking hour is different from
         dfS,seglonLstS,segLatLstS,segcolorLstS=getInfoHrSug(hrSug,dhr,latRange,lonRange,conn)
-        return lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrSug,RSSug,dfS,seglonLstS,segLatLstS,segcolorLstS,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW
+        return lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrSug,RSSug,dfS,seglonLstS,segLatLstS,segcolorLstS,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW,address
     else:
-        return lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrSug,RSSug,dfHrLoc,seglonLst,seglatLst,segcolorLst,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW
+        return lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrSug,RSSug,dfHrLoc,seglonLst,seglatLst,segcolorLst,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW,address
 
 #-- get the lat, lon, segments for the suggested hour--- my code is a mess, should rewrite it!!
 def getInfoHrSug(hrSug,dhr,latRange,lonRange,conn):
@@ -148,7 +144,7 @@ def getInfoHrSug(hrSug,dhr,latRange,lonRange,conn):
     sql='SELECT "Longitude","Latitude","DayOfYear" FROM %s WHERE (%s) AND (%s)'%(TABLENM,sqltime,sqlloc)
     #sql='SELECT "Longitude","Latitude","DayOfYear" FROM %s WHERE (%s) AND (%s) AND "DayOfYear"%s2=0'%(TABLENM,sqltime,sqlloc,"%")
     dfS=pd.read_sql(sql,conn)
-    flagRandom,seglonLstS,seglatLstS,segcolorLstS=crimeKdeCorr(dfS,step=100,flagCptCorr=0);
+    flagRandom,seglonLstS,seglatLstS,segcolorLstS,locPeak=crimeKdeCorr(dfS,step=100,flagCptCorr=0);
 
     return dfS,seglonLstS,seglatLstS,segcolorLstS
 
@@ -393,7 +389,9 @@ def crimeKdeCorr(df,step=100,bandwidth=BANDWIDTH,rad=RADIUS,flagCptCorr=0):
     Z=np.reshape(kernel(positions).T,lonGrid.shape)
     #Zthresh=np.copy(Z)
     #locLst=Z>Z.max()*0.8
-    #locPeak=np.vstack([lonGrid[locLst],latGrid[locLst]])
+    locLst=(Z==Z.max())
+    locPeak=np.vstack([lonGrid[locLst],latGrid[locLst]]).T
+    print "### test, peak locations,",locPeak
 
     #---get conour
     #---create a wider mesh for getting contour
@@ -482,7 +480,7 @@ def crimeKdeCorr(df,step=100,bandwidth=BANDWIDTH,rad=RADIUS,flagCptCorr=0):
         # -25.034908+29.109945=4.075037
         else:
          print   "### negative slope, has structure? %f+%f=%f"%(linFit.params[1],linFit.bse[1],slopeMax)
-    return  flagRandom,seglonLst,seglatLst,segcolorLst
+    return  flagRandom,seglonLst,seglatLst,segcolorLst,locPeak
 
 #"""    
 # In[1270]:

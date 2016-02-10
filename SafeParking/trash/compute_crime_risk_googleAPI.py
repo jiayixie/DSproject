@@ -385,8 +385,9 @@ def crimeKdeCorr(df,step=100,bandwidth=BANDWIDTH,rad=RADIUS,flagCptCorr=0):
     Z=np.reshape(kernel(positions).T,lonGrid.shape)
     #Zthresh=np.copy(Z)
     #locLst=Z>Z.max()*0.8
-    #locPeak=np.vstack([lonGrid[locLst],latGrid[locLst]])
-
+    locLst=Z.index(Z.max())
+    locPeak=np.vstack([lonGrid[locLst],latGrid[locLst]])
+    
     #---get conour
     #---create a wider mesh for getting contour
     Nwiden=20; #must be a even number
@@ -416,7 +417,7 @@ def crimeKdeCorr(df,step=100,bandwidth=BANDWIDTH,rad=RADIUS,flagCptCorr=0):
             seglonLst.append(seglon[i])
             seglatLst.append(seglat[i])
             segcolorLst.append(colorLst[ir])
-    #print "ceters, in lon,lat",locPeak
+    print "####test, Peak ceters, in lon,lat",locPeak
     #kdeCenterGeo=locPeak.T
     #print "###### shape",kdeCenterGeo.shape
     #kdeCenterVal=Z[locLst]

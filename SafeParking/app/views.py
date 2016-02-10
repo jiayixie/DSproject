@@ -7,7 +7,8 @@ import numpy as np
 import os
 import sys
 
-sys.path.append("/Users/cv/DS/Insight/class/Project_crime/program_analyze_data")
+sys.path.append("/Users/cv/Documents/Jiayi/study/DataScienceProject/SafeParking/prog")
+#sys.path.append("/Users/cv/DS/Insight/class/Project_crime/program_analyze_data")
 #import compute_crime_risk as ccr
 #import compute_crime_risk_googleAPI as ccr
 import compute_crime_risk_googleAPI_v2 as ccr
@@ -67,7 +68,7 @@ def output():
 
 	if addressIn==' ':
 		addressIn='Chicago,IL' #default address
-	lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrS,RSS,dfS,seglonLstS,seglatLstS,segcolorLstS,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW=ccr.getCrimeMap(addressIn,hr,dur)
+	lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrS,RSS,dfS,seglonLstS,seglatLstS,segcolorLstS,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW,address=ccr.getCrimeMap(addressIn,hr,dur)
 	if (flagNoCrime>0): # there is no crime in this area
 		message="No historical crime found in %s"%addressIn
 		return render_template("error.html",latC=latC,lonC=lonC)
@@ -83,23 +84,23 @@ def output():
 		#
 		title1="Park at %d:00 for %d hours: "%(hr,dur)
 		if RSW>50:
-			title2="HIGH crime area | Risk Score %d"%(RSW)
+			title2="HIGH crime area | Risk Score %d (city avg.=50)"%(RSW)
 		else:
-			title2="LOW crime area | Risk Score %d"%(RSW)
+			title2="LOW crime area | Risk Score %d (city avg.=50)"%(RSW)
 		#	
-		if flagRandom>0:
-			message="Crimes appear to be randonly distributed, park at your own risk!"
-		else:
-			message="Watch out for peak crime area!"
+		#if flagRandom>0:
+		#	message="Crimes appear to be randonly distributed, park at your own risk!"
+		#else:
+		message="Watch out for peak crime area  near"
 		#	
 		if(hr!=hrS):
 			#message2="Suggested parking hour: %d:00 (risk decrease by %.0f%s)"%(hrS,(RSAll-RSS)*100./RSAll,"%")
-			message2="Park at %d:00, decrese risk by %.0f%s"%(hrS,(RSAll-RSS)*100./RSAll,"%")
+			message2="Park at %d:00, decrease risk by %.0f%s"%(hrS,(RSAll-RSS)*100./RSAll,"%")
 		else:
 			message2=" "
 			#seglonLstW,segLatLstW,segcolorLstW=
 		#return render_template("error.html",latC=latC,lonC=lonC)
-		return render_template("output.APItest.v2.html",addressLst=addressIn,message=message,title1=title1,titlemsg=title2,latC=latC,lonC=lonC,lonlstSeg=seglonLst,latlstSeg=seglatLst,colorlst=segcolorLst,lonlstH=lonlstH,latlstH=latlstH,message2=message2,imgnmRS=imgnmRS,hr=hr,hrS=hrS,lonlstHS=lonlstHS,latlstHS=latlstHS,lonlstSegS=seglonLstS,latlstSegS=seglatLstS,colorlstS=segcolorLstS,lonlstHW=lonlstHW,latlstHW=latlstHW,lonlstSegW=seglonLstW,latlstSegW=segLatLstW,colorlstW=segcolorLstW,RSW=RSW)
+		return render_template("output.APItest.v2.html",addressLst=addressIn,message=message,title1=title1,titlemsg=title2,latC=latC,lonC=lonC,lonlstSeg=seglonLst,latlstSeg=seglatLst,colorlst=segcolorLst,lonlstH=lonlstH,latlstH=latlstH,message2=message2,imgnmRS=imgnmRS,hr=hr,hrS=hrS,lonlstHS=lonlstHS,latlstHS=latlstHS,lonlstSegS=seglonLstS,latlstSegS=seglatLstS,colorlstS=segcolorLstS,lonlstHW=lonlstHW,latlstHW=latlstHW,lonlstSegW=seglonLstW,latlstSegW=segLatLstW,colorlstW=segcolorLstW,RSW=RSW,addressPeak=address)
 		#return render_template("output.html",addressLst=addressIn,message=message,title1=title1,titlemsg=title2,latC=latC,lonC=lonC,lonlstSeg=seglonLst,latlstSeg=seglatLst,colorlst=segcolorLst,lonlstH=lonlstH,latlstH=latlstH,message2=message2,imgnmRS=imgnmRS)
 		#return render_template("output.gmplot.html",addressLst=addressOut,impath=impath,message=message,titlemsg=title)
 	#---call my python functions that computes the crime rate, and makes plot
