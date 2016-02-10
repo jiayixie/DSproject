@@ -9,6 +9,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.pipeline import Pipeline
 from sklearn.pipeline import make_pipeline
+from sklearn.decomposition import PCA
 from copy import deepcopy
 import matplotlib.pyplot as plt
 from pandas.tools.plotting import scatter_matrix
@@ -128,6 +129,32 @@ def featureRedu(dfIn):
 	#-attention, the len(recordCoeffLst)=len(lastfLst)+1!=len(lastfLst) because the 0th Coeff is for the constant/intercept, not for feature coeff
 	return recordErrorLst,recordCoeffLst,lastfLst  
 
+#=== PCA ====== 
+#- apply the PCA method to our data features. The output transformed feature would have no real physical meaning?
+#- principal component analysis, Linear dimensionality reduction using Singular Value Decomposition of the data and keeping only the most significant singular vectors to project the data to a lower dimensional space.
+def do_PCA(ncomp,dfIn):
+	featureNameList=['Store','OrdinalDay','DayOfWeek','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin'] #,'Customers'] 
+	df=dfIn[featureNameList]
+	x=df.values
+	#preprocess
+	pca=PCA(n_components=ncomp,copy=True,whiten=False)
+	pca.fit(x)
+	xTrans=pca.fit_transform(x)
+	pca_score=pca.explained_variance_ratio_ # Percentage of variance explained by each of the selected components [n_components]
+	pca_V=pca.components_ # Principal axes in feature space, representing the directions of maximum variance in the data. [n_components, n_features]
+	for i in range(ncomp):
+		#index=np.argmax(pca_V[i])
+		indexLst=np.argsort(map(np.abs,pca_V[i]))
+		print pca_V[i][indexLst]
+		for j in range(2):
+			k=-1-j
+			index=indexLst[k]
+			print "dominant feature {0} is {1},{2}".format(i,featureNameList[index],pca_V[i][index])
+
+	return xTrans,pca_score,pca_V
+
+
+
 #=== the simple regression, polynomial + linear regression
 def regression_simp(x,y,deg):
 	#est=make_pipeline(sklearn.preprocessing.PolynomialFeatures(deg),LinearRegression())
@@ -219,7 +246,18 @@ def main():
 	data.df=data.df.sort(columns=['OrdinalDay'],ascending=True)
 	print "\n=====writting the combined data..."
 	data.df.to_csv("./combined_train_store.csv")
+	
+	#=== pre-process the data
+	#featureNameList=list(data.df.columns.values)
+	featureNameList=['Store','OrdinalDay','DayOfWeek','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin','Customers']
+	data.normalizeFeatures('standard',featureNameList)
 
+	#=== do PCA ===
+
+	xTrans=pca_score,pca_V=do_PCA(2,data.dfScaled)
+	print pca_score
+	print pca_V
+	"""
 	#===do feature reduction
 	ErrorReduLst,CoeffReduLstLst,featureReduLst =featureRedu(data.df)
 	featureNameList=['Sales']+featureReduLst[0:5]
@@ -238,8 +276,8 @@ def main():
 	y=data.df['Sales'].values
 	#featureNameList=['Store','OrdinalDay','DayOfWeek','Open','Promo','SchoolHoliday','PublicHoliday','EasternHolidy','Christmas','Year','DayOfYear','StoreTypeA','StoreTypeB','StoreTypeC','AssortmentNum','Promo2','CompetitionOpen','Promo2Begin'] # 'Customers'
 	featureNameList=featureReduLst[0:5]
-	data.normalizeFeatures('standard',featureNameList) #-> self.dfScaled, self.scaler
-	x=data.dfScaled.values
+	#data.normalizeFeatures('standard',featureNameList) #-> self.dfScaled, self.scaler
+	x=data.dfScaled[featureNameList].values
 	#x=data.df[featureNameList].values
     	xTrain,xTest,yTrain,yTest=train_test_split(x,y,train_size=0.8)
 	#-
@@ -253,7 +291,7 @@ def main():
 		idX=-1
 	plotRegression(idX,degLst,xTrain,yTrain,yTrainPredLst,xTest,yTest,yTestPredLst)
 	#===========
-
+	"""
 	
 	
 

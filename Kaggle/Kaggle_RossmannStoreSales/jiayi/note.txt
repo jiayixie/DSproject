@@ -25,8 +25,11 @@ constraints?
 , the final output is Sales as a function of DayOfWeek+Open+Promo+Holiday+etc.
 * normalization (maybe it's build-in inside the program)
 * remove redundant features: Open&Holiday? Promo&Promo2+Promo2Since+PromoInterval?
-* 
-* 
+*
+Nov 23: 
+* applied stepwise feature selection & least square to store 1
+* try PCA, regularized regression (lasso and ridge regression)
+* try tree regression, random forest(learn)?
 
 Problems:
 * Regression, unstable prediction, sometimes, the predicted Sales value goes all the way to +1e11, or <0

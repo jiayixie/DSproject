@@ -1,0 +1,61 @@
+### QUESTION ###
+restaurant feature?
+source activate dato-env
+
+#
+user's history: type of restaurant, star, 
+restaurant
+
+feature1. Chinese nor not,
+2. Ame or not
+3. fast or not
+4. open time
+5. rating
+6. ...
+
+Y: rating
+#
+userid, itemid, rating
+#
+user, user name, 
+#
+itemid(rest), itemname, category, address
+#
+address + type of rest -> select item --> select corresponding rating table --> compute vector, cos, sin similarity 
+# 
+collaborate filtering ??
+#
+no rating 0, rating+like 5, rating+dislike 1. --> normalize. dislike < no_rating. 
+
+#---
+App:
+for given user, find user's history, put into the model.
+
+#---
+If no user information: cold start.
+
+#---
+restaurant that user went to before. 
+you and I, find similarity between users. near neighbor. 
+
+#---
+#---
+input a few restaurant you like, then give you a list of recommended restaurant.
+tell me 3 you like.
+find similar user. 
+find location
+
+#---
+graphlab 
+user, restaurant, rating. 
+
+user1, 0-9k restaurant, 
+user2, 0-9k restaurant,
+
+loop over, compute cos, angle between users, find the top 10 users that are most similar.
+remove the overlapped restaurant
+
+#---
+restaurant1, user 0-10k.
+
+
