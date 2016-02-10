@@ -1,0 +1,45 @@
+<!--contact -->
+{% extends "base.html" %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+
+<div class="starter-template">
+ <div class="container">
+
+	 <div class="col-md-6 "  style="background-color: white; opacity: 1.0; overflow:auto; height:600px; " >
+		 <h4><b>{{titlemsg}}</b><h4>	 
+		 <p>{{message}}</p>		 
+	 <!---output the table of locations-->
+	 <h4><b>PEAK CRIME LOCATIONS</b> <h4>	 
+	<table class="table table-hover sortable">
+	<tr><th>No.</th><th>Address</th></tr>
+	{% set i=1 %}
+	{% for addr in addressLst %}
+	<tr><td>{{i}}</td><td>{{addr}}</td></tr>
+	{% set i = i+1 %}
+	{% endfor %}
+	</table>
+	</div> <!--colmd6-->
+
+	<div class="col-md-6 "  style="background-color: white; opacity: 1.0; overflow:auto; height:600px; ">
+		<iframe src="/image/{{impath}}"  height='600' width='570' > </iframe>
+		<!-- 
+		<iframe src="../static/img/mymap.html" class="media-object"  height='550' width='450' > </iframe>
+		<img src="../static/img/merge_static_heatmap.png" class="media-object" height=450 width=450 >
+		<iframe src="/mymap.html" class="media-object"  height='550' width='450' title="mymap" > </iframe>
+		<iframe src="mymap.html"  height='550' width='450' > </iframe>
+		<iframe src="../static/img/mymap2.html" class="media-object"  height='550' width='450' > </iframe>
+		<img class="media-object" src="../static/img/6771549.jpg" alt='Heatmap!' height='600' width='600'> 
+		-->
+	</div>	
+		<!---
+		-->
+</div> <!--container-->
+</div> <!-- starter-template>
+
+
+
+{% endblock %}

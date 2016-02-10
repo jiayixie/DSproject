@@ -1,0 +1,118 @@
+<!--google map API, trick on clear all overlay: http://apitricks.blogspot.com/2010/02/clearoverlays-in-v3.html -->
+{% extends "base.html" %}
+
+{% block head %}
+<!--<script
+	src="http://maps.googleapis.com/maps/api/js?AIzaSyArTKviZmHVM3yFnvF30lWvUReDfQtH8EY">
+</script> -->
+<script>
+//--center of the map --
+//var myCenter=new google.maps.LatLng(52.395715,4.888916);
+
+function initMap()
+{
+var myCenter=new google.maps.LatLng({{latC}},{{lonC}});
+//--read in list of segments, and desired color 
+var ylst2={{lonlstSeg|tojson}};
+var xlst2={{latlstSeg|tojson}};
+var colorLst={{colorlst|tojson}};
+//--heat list
+var ylstH={{lonlstH|tojson}};
+var xlstH={{latlstH|tojson}};
+
+var mapProp = {
+  center:myCenter,
+  zoom:15,
+  mapTypeId:google.maps.MapTypeId.ROADMAP
+  };
+
+var mapProp2 = {
+  center:myCenter,
+  zoom:15,
+  mapTypeId:google.maps.MapTypeId.SATELLITE
+  };
+
+var map=new google.maps.Map(document.getElementById("map"),mapProp);
+var map2=new google.maps.Map(document.getElementById("map2"),mapProp2);
+
+//-- plot the marker at central location---
+var marker=new google.maps.Marker({
+  position:myCenter,
+  });
+marker.setMap(map);
+//-- plot the heat map -- here i use lon as y, lat as x, not ideal, just for convience
+var myheat=[];
+//var ylstH={{lonlstH|tojson}};
+//var xlstH={{latlstH|tojson}};
+for(var i=0;i<xlstH.length;i++){
+  var point = new google.maps.LatLng(xlstH[i],ylstH[i]);
+  myheat.push(point);
+}
+var heatmap=new google.maps.visualization.HeatmapLayer({
+  data:myheat,
+  radius:50,
+});
+heatmap.setMap(map);
+
+//---
+//--plot each polygon--
+function createPath(xlst,ylst,color){
+var myTrip=[];
+for(var i=0;i<xlst.length;i++){
+  var a = new google.maps.LatLng(xlst[i],ylst[i]);
+  myTrip.push(a);
+}
+
+var flightPath=new google.maps.Polygon({
+  path:myTrip,
+  strokeColor:color,
+  strokeOpacity:0.8,
+  strokeWeight:5,
+  fillColor:color,
+  fillOpacity:0.1
+  });
+flightPath.setMap(map);
+}
+//--plot multiple polygon--
+//--read in list of segments, and desired color 
+//var ylst2={{lonlstSeg|tojson}};
+//var xlst2={{latlstSeg|tojson}};
+//var colorLst={{colorlst|tojson}};
+for(var i=0;i<xlst2.length;i++){
+	xlst=xlst2[i];
+	ylst=ylst2[i];
+	color=colorLst[i];
+	createPath(xlst,ylst,color);
+
+}//for var i
+}//initMap
+
+//google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div class="starter-template">
+ <div class="container">
+
+	 <div class="col-md-6 "  style="background-color: white; opacity: 1.0; overflow:auto; height:500px; " >
+		<h4><b>{{title1}}</b><h4>	 
+		<h4><b>{{titlemsg}}</b><h4>	 
+		<p>{{message}}</p>		 
+		<p>{{message2}}</p>
+		<img src="/image/{{imgnmRS}}" height='300'; width=400>
+	</div> <!--colmd6-->
+
+	<div id="map" style="width:550px;height:500px;"></div>
+	<div id="map2" style="width:550px;height:500px;"></div>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArTKviZmHVM3yFnvF30lWvUReDfQtH8EY&signed_in=true&libraries=visualization&callback=initMap">
+	</script>
+		<!---
+		-->
+</div> <!--container-->
+</div> <!-- starter-template>
+
+
+
+{% endblock %}

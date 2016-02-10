@@ -1,0 +1,178 @@
+<!--google map API, trick on clear all overlay: http://apitricks.blogspot.com/2010/02/clearoverlays-in-v3.html -->
+{% extends "base.html" %}
+
+{% block head %}
+<!--<script
+	src="http://maps.googleapis.com/maps/api/js?AIzaSyArTKviZmHVM3yFnvF30lWvUReDfQtH8EY">
+</script> -->
+<style>
+.button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 50px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.button2 {background-color: #66b2ff;} /* Blue */
+.button3 {background-color: #f44336;} /* Red */ 
+.button4 {background-color: #e7e7e7; color: black;} /* Gray */ 
+.button5 {background-color: #555555;} /* Black */
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="starter-template">
+ <div class="container">
+
+	 <div class="col-md-6 "  style="background-color: white; opacity: 1.0; overflow:auto; height:550px; " >
+		 <!--<h4><b>{{title1}}</b><h4>	 -->
+		<h4><b>{{titlemsg}}</b><h4>	 
+		<p>{{message}}</p>		 
+		<br>
+		<h4 style="color:blue;"><b>{{message2}}<h4></p>
+		<img src="/image/{{imgnmRS}}" height='320'; width=450>
+	</div> <!--colmd6-->
+
+	<div id="map" style="width:550px;height:550px;"></div>
+<script>
+//--center of the map --
+//--- global variable ---
+var map;
+var overlays=[];
+var myCenter;
+var hr={{hr}};
+var hrS={{hrS}};
+//---
+//--- read in the list for the initial hour---
+//--read in list of segments, and desired color 
+//hr=hr,hrS=hrS,lonlstHS=lonlstHS,latlstHS=latlstHS,lonlstSegS=seglonLstS,latlstSegS=seglatLstS,colorlstS=segcolorLstS
+var ylst2={{lonlstSeg|tojson}};
+var xlst2={{latlstSeg|tojson}};
+var colorLst={{colorlst|tojson}};
+//--heat list
+var ylstH={{lonlstH|tojson}};
+var xlstH={{latlstH|tojson}};
+//--- read in the list for the suggested hour---
+var ylst2S={{lonlstSegS|tojson}};
+var xlst2S={{latlstSegS|tojson}};
+var colorLstS={{colorlstS|tojson}};
+var ylstHS={{lonlstHS|tojson}};
+var xlstHS={{latlstHS|tojson}};
+//-- read in the list for the whole day --
+var ylst2W={{lonlstSegW|tojson}};
+var xlst2W={{latlstSegW|tojson}};
+var colorLstW={{colorlstW|tojson}};
+var ylstHW={{lonlstHW|tojson}};
+var xlstHW={{latlstHW|tojson}};
+//--- begin the inital google map ----
+function initMap()
+{
+myCenter=new google.maps.LatLng({{latC}},{{lonC}});
+var mapProp = {
+  center:myCenter,
+  zoom:15,
+  mapTypeId:google.maps.MapTypeId.ROADMAP
+  };
+  map=new google.maps.Map(document.getElementById("map"),mapProp);
+  plotLayer(map,ylst2,xlst2,ylstH,xlstH,colorLst);
+  //plotInitial(map);
+}//initMap
+//---- clean all map layers, clear everything in the global var overlays
+function plotClear(){
+  while(overlays[0]){
+  	overlays.pop().setMap(null);
+  }
+}//plotClear
+//--- plot the initial map again
+function plotInit(){
+  plotClear();	
+  plotLayer(map,ylst2,xlst2,ylstH,xlstH,colorLst);
+}
+//--- plot the map for suggested hour
+function plotSugg(){
+  plotClear();
+  plotLayer(map,ylst2S,xlst2S,ylstHS,xlstHS,colorLstS);
+}
+//--- plot the map for the whole day
+function plotWhole(){
+  plotClear();
+  plotLayer(map,ylst2W,xlst2W,ylstHW,xlstHW,colorLstW);
+}
+//---- plot the initial map for the input hour
+function plotLayer(map,ylst2,xlst2,ylstH,xlstH,colorLst){
+//-- plot the marker at central location---
+var marker=new google.maps.Marker({
+  position:myCenter,
+  });
+  marker.setMap(map);
+  overlays.push(marker);
+//-- plot the heat map -- here i use lon as y, lat as x, not ideal, just for convience
+var myheat=[];
+for(var i=0;i<xlstH.length;i++){
+  var point = new google.maps.LatLng(xlstH[i],ylstH[i]);
+  myheat.push(point);
+}
+var heatmap=new google.maps.visualization.HeatmapLayer({
+  data:myheat,
+  radius:20,
+});
+heatmap.setMap(map);
+overlays.push(heatmap);
+
+//---
+//--plot each polygon--
+function createPath(xlst,ylst,color){
+var myTrip=[];
+for(var i=0;i<xlst.length;i++){
+  var a = new google.maps.LatLng(xlst[i],ylst[i]);
+  myTrip.push(a);
+}
+
+var contourPath=new google.maps.Polygon({
+  path:myTrip,
+  strokeColor:color,
+  strokeOpacity:0.8,
+  strokeWeight:5,
+  fillColor:color,
+  fillOpacity:0.1
+  });
+  contourPath.setMap(map);
+  overlays.push(contourPath);
+}
+//--plot multiple polygon--
+//--read in list of segments, and desired color 
+for(var i=0;i<xlst2.length;i++){
+	xlst=xlst2[i];
+	ylst=ylst2[i];
+	color=colorLst[i];
+	createPath(xlst,ylst,color);
+
+}//for var i
+}// plot map layer
+
+</script>
+
+     <div>
+     <center>
+      <button class="button button3" onclick="plotWhole()"  >Whole Day </button>
+      <button class="button button4" onclick="plotInit()"  >Your Input {{hr}}:00 </button>
+      <button class="button button2"  onclick="plotSugg()" >Suggested {{hrS}}:00</button>
+      </center>
+    </div>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArTKviZmHVM3yFnvF30lWvUReDfQtH8EY&signed_in=true&libraries=visualization&callback=initMap">
+	</script>
+		<!---
+		-->
+</div> <!--container-->
+</div> <!-- starter-template>
+
+
+
+{% endblock %}

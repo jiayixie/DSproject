@@ -1,0 +1,57 @@
+<!--google map API, trick on clear all overlay: http://apitricks.blogspot.com/2010/02/clearoverlays-in-v3.html -->
+{% extends "base.html" %}
+
+{% block head %}
+<!--<script
+	src="http://maps.googleapis.com/maps/api/js?AIzaSyArTKviZmHVM3yFnvF30lWvUReDfQtH8EY">
+</script> -->
+{% endblock %}
+
+{% block content %}
+
+<div class="starter-template">
+ <div class="container">
+
+	 <div class="col-md-6 "  style="background-color: white; opacity: 1.0; overflow:auto; height:550px; " >
+		<h4><b>No historical crimes</b><h4>
+		<h4><b>Safe to park!</b><h4>
+		<br>
+	</div> <!--colmd6-->
+
+	<div id="map" style="width:550px;height:550px;"></div>
+<script>
+//--center of the map --
+//--- global variable ---
+var map;
+var myCenter;
+//---
+//--- begin the inital google map ----
+function initMap()
+{
+  myCenter=new google.maps.LatLng({{latC}},{{lonC}});
+  var mapProp = {
+  center:myCenter,
+  zoom:15,
+  mapTypeId:google.maps.MapTypeId.ROADMAP
+  };
+  map=new google.maps.Map(document.getElementById("map"),mapProp);
+  var marker=new google.maps.Marker({
+  position:myCenter,
+  });
+  marker.setMap(map);
+
+  //plotInitial(map);
+}//initMap
+
+</script>
+
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArTKviZmHVM3yFnvF30lWvUReDfQtH8EY&signed_in=true&libraries=visualization&callback=initMap">
+	</script>
+		<!---
+		-->
+</div> <!--container-->
+</div> <!-- starter-template>
+
+
+
+{% endblock %}
