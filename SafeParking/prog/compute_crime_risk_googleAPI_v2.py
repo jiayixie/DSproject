@@ -24,12 +24,12 @@ import pandas as pd
 import geocoding as geo #use pygeocoding instead?
 import numpy as np
 import scipy as sp
-import pymysql as mdb
-import pandas.io.sql as psql
+#import pymysql as mdb
+#import pandas.io.sql as psql
 from sklearn.neighbors import KernelDensity
 import scipy.ndimage as ndimage
 from PIL import Image
-from StringIO import StringIO
+#from StringIO import StringIO
 from pygeocoder import Geocoder
 from astroML.correlation import bootstrap_two_point_angular
 import statsmodels.api as sm
@@ -489,7 +489,7 @@ if __name__ == "__main__":
 	#addressIn="Ogden park, Chicago, IL" # has little structure - random
 	addressIn="University of Chicago, Chicago, IL" # oh, lots of structure, for both 20m and 50m radius/bandwidth
 	#lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrSug,RSSug,dfS,seglonLstS,segLatLstS,segcolorLstS
-	lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrSug,RSSug,dfHrLoc,seglonLst,seglatLst,segcolorLst,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW=getCrimeMap(addressIn,9,4)
+	lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrSug,RSSug,dfHrLoc,seglonLst,seglatLst,segcolorLst,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW,address=getCrimeMap(addressIn,9,4)
 	print imgnmRS
 #print gmapNm
         #print seg2lon
