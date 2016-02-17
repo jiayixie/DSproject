@@ -71,8 +71,9 @@ def output():
 	if addressIn==' ':
 		addressIn='Chicago,IL' #default address
 	lonC,latC,RSHr,RSAll,dfHrLocdelta,dfHrLoc,flagNoCrime,flagRandom,seglonLst,seglatLst,segcolorLst,imgnmRS,hrS,RSS,dfS,seglonLstS,seglatLstS,segcolorLstS,dfW,seglonLstW,segLatLstW,segcolorLstW,RSW,address=ccr.getCrimeMap(addressIn,hr,dur)
-	if (flagNoCrime>0): # there is no crime in this area, maybe a wrong input address, something outside my database area
-		return render_template("error.AWS.html",latC=latC,lonC=lonC,address=addressIn)
+	if (flagNoCrime>0): # there is no crime in this area
+		message="No historical crime found in %s"%addressIn
+		return render_template("error.html",latC=latC,lonC=lonC)
 	else:	
 		hrS=int(hrS)
 		lonlstH=list(dfHrLoc['Longitude'].values.ravel())	
