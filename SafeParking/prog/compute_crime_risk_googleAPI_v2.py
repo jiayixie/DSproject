@@ -385,7 +385,7 @@ def crimeKdeCorr(df,step=100,bandwidth=BANDWIDTH,rad=RADIUS,flagCptCorr=0):
     #---- test, change bandwidth---
     #kernel=sp.stats.gaussian_kde(values,bw_method=1000.*meter2deg)# this is strange!
     kernel=sp.stats.gaussian_kde(values)
-    #print "####bandwidth=",kernel.covariance_factor()**0.5,kernel.covariance_factor()*deg2meter**0.5  # this value makes sense!
+    print "####bandwidth=",kernel.covariance_factor()**0.5,kernel.covariance_factor()*deg2meter**0.5  # this value makes sense!
     Z=np.reshape(kernel(positions).T,lonGrid.shape)
     #Zthresh=np.copy(Z)
     #locLst=Z>Z.max()*0.8
